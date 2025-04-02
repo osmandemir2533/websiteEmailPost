@@ -5,7 +5,9 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+
+// Portu, Render'ın sağladığı ortam değişkeninden alıyoruz.
+const port = process.env.PORT || 5000;  // Eğer Render ortamında ise, PORT otomatik belirlenir.
 
 // Middleware'ler
 app.use(cors());
@@ -14,7 +16,6 @@ app.use(bodyParser.json());
 app.get('/', (req, res) => {
   res.send('API Çalışıyor! 🚀 POST /send-email endpointini kullan.');
 });
-
 
 // Web3Forms API URL
 const WEB3FORMS_API_URL = 'https://api.web3forms.com/submit';
@@ -46,7 +47,7 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-// Sunucuyu başlat
+// Sunucuyu başlat (Render URL ile)
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com`);  // Render URL'si
 });
