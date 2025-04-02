@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const qs = require('qs');  // qs modülünü ekliyoruz
 require('dotenv').config();
 
 const app = express();
@@ -32,11 +33,19 @@ app.post('/send-email', async (req, res) => {
   try {
     console.log('Form verileri:', { name, email, message });
 
-    const response = await axios.post(WEB3FORMS_API_URL, {
+    // Verileri application/x-www-form-urlencoded formatına dönüştürme
+    const formData = qs.stringify({
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name,
       email,
-      message,
+      message
+    });
+
+    // Axios ile form verilerini Web3Forms API'ye gönderme
+    const response = await axios.post(WEB3FORMS_API_URL, formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',  // Content-Type başlığını uygun şekilde ayarlıyoruz
+      },
     });
 
     console.log('Web3Forms yanıtı:', response.data);
