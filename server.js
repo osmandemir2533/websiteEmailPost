@@ -25,10 +25,13 @@ app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
+    console.error('Eksik veri:', req.body);  // Verinin eksik olduğunda loglama
     return res.status(400).json({ message: 'Lütfen tüm alanları doldurun!' });
   }
 
   try {
+    console.log('Form verileri:', { name, email, message });
+
     const response = await axios.post(WEB3FORMS_API_URL, {
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name,
@@ -36,9 +39,12 @@ app.post('/send-email', async (req, res) => {
       message,
     });
 
+    console.log('Web3Forms yanıtı:', response.data);
+
     if (response.data.success) {
       res.status(200).json({ message: 'Form başarıyla gönderildi!' });
     } else {
+      console.error('Web3Forms hatası:', response.data);
       res.status(500).json({ message: 'Form gönderilemedi, tekrar deneyin.' });
     }
   } catch (error) {
