@@ -32,7 +32,7 @@ app.post('/send-email', async (req, res) => {
 
   try {
     console.log('Form verileri:', { name, email, message });
-
+  
     // Verileri application/x-www-form-urlencoded formatına dönüştürme
     const formData = qs.stringify({
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
@@ -40,26 +40,27 @@ app.post('/send-email', async (req, res) => {
       email,
       message
     });
-
+  
     // Axios ile form verilerini Web3Forms API'ye gönderme
     const response = await axios.post(WEB3FORMS_API_URL, formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',  // Content-Type başlığını uygun şekilde ayarlıyoruz
       },
     });
-
-    console.log('Web3Forms yanıtı:', response.data);
-
+  
+    console.log('Web3Forms yanıtı:', response.data);  // Detaylı hata yanıtı burada yazdırılacak
+  
     if (response.data.success) {
       res.status(200).json({ message: 'Form başarıyla gönderildi!' });
     } else {
-      console.error('Web3Forms hatası:', response.data);
+      console.error('Web3Forms hatası:', response.data);  // Burada hata mesajını daha ayrıntılı yazdırıyoruz
       res.status(500).json({ message: 'Form gönderilemedi, tekrar deneyin.' });
     }
   } catch (error) {
     console.error('Form gönderme hatası:', error.message);
     res.status(500).json({ message: 'Bir hata oluştu, tekrar deneyin.' });
   }
+  
 });
 
 // Sunucuyu başlat (Render URL ile)
