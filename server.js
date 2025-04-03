@@ -2,11 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-const qs = require('qs');  // qs modülünü ekliyoruz
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+
+// Portu, Render'ın sağladığı ortam değişkeninden alıyoruz.
+const port = process.env.PORT || 5000;  // Eğer Render ortamında ise, PORT otomatik belirlenir.
 
 // Middleware'ler
 app.use(cors());
@@ -24,27 +25,25 @@ app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
-    console.error('Eksik veri:', req.body);
+    console.error('Eksik veri:', req.body);  // Verinin eksik olduğunda loglama
     return res.status(400).json({ message: 'Lütfen tüm alanları doldurun!' });
   }
 
   try {
     console.log('Form verileri:', { name, email, message });
 
-    const formData = qs.stringify({
+    // Web3Forms API'ye POST isteği gönder
+    const response = await axios.post(WEB3FORMS_API_URL, {
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name,
       email,
       message,
-    });
-
-    const response = await axios.post(WEB3FORMS_API_URL, formData, {
+    }, {
       headers: {
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json',  // JSON formatında gönderdiğimizden bu başlık eklenmeli
+      }
     });
 
-    // Web3Forms yanıtını logla
     console.log('Web3Forms yanıtı:', response.data);
 
     if (response.data.success) {
@@ -61,5 +60,5 @@ app.post('/send-email', async (req, res) => {
 
 // Sunucuyu başlat (Render URL ile)
 app.listen(port, () => {
-  console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com`);
+  console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com`);  // Render URL'si
 });
