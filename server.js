@@ -23,35 +23,30 @@ const WEB3FORMS_API_URL = 'https://api.web3forms.com/submit';
 app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
-  // Gerekli alanlar kontrol ediliyor
   if (!name || !email || !message) {
-    console.error('Eksik veri:', req.body);  // Verinin eksik olduğunda loglama
+    console.error('Eksik veri:', req.body);
     return res.status(400).json({ message: 'Lütfen tüm alanları doldurun!' });
   }
 
   try {
-    // Gönderilecek form verilerini loglama
     console.log('Form verileri:', { name, email, message });
 
-    // Verileri application/x-www-form-urlencoded formatına dönüştürme
     const formData = qs.stringify({
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name,
       email,
-      message
+      message,
     });
 
-    // Axios ile form verilerini Web3Forms API'ye gönderme
     const response = await axios.post(WEB3FORMS_API_URL, formData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',  // Content-Type başlığını uygun şekilde ayarlıyoruz
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
 
-    // Web3Forms yanıtını loglama
+    // Web3Forms yanıtını logla
     console.log('Web3Forms yanıtı:', response.data);
 
-    // Başarı durumu kontrolü
     if (response.data.success) {
       res.status(200).json({ message: 'Form başarıyla gönderildi!' });
     } else {
