@@ -40,7 +40,7 @@ app.post('/send-email', async (req, res) => {
 
     const response = await axios.post(WEB3FORMS_API_URL, formData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
     });
 
