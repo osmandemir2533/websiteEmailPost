@@ -43,5 +43,5 @@ app.post('/send-email', async (req, res) => {
 
 // Sunucuyu başlat
 app.listen(port, () => {
-  console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com//send-email`);
+  console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com/send-email`);
 });
