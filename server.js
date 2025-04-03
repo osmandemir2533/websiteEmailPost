@@ -30,9 +30,6 @@ app.post('/send-email', async (req, res) => {
   }
 
   try {
-    console.log('Form verileri:', { name, email, message });
-
-    // Web3Forms API'ye POST isteği gönder
     const response = await axios.post(WEB3FORMS_API_URL, {
       access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name,
@@ -40,12 +37,12 @@ app.post('/send-email', async (req, res) => {
       message,
     }, {
       headers: {
-        'Content-Type': 'application/json',  // JSON formatında gönderdiğimizden bu başlık eklenmeli
+        'Content-Type': 'application/json',
       }
     });
-
+  
     console.log('Web3Forms yanıtı:', response.data);
-
+  
     if (response.data.success) {
       res.status(200).json({ message: 'Form başarıyla gönderildi!' });
     } else {
