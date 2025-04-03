@@ -8,6 +8,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Middleware'ler
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -22,11 +23,14 @@ const WEB3FORMS_API_URL = 'https://api.web3forms.com/submit';
 app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
+  // Gerekli alanlar kontrol ediliyor
   if (!name || !email || !message) {
+    console.error('Eksik veri:', req.body);  // Verinin eksik olduğunda loglama
     return res.status(400).json({ message: 'Lütfen tüm alanları doldurun!' });
   }
 
   try {
+    // Gönderilecek form verilerini loglama
     console.log('Form verileri:', { name, email, message });
 
     // Verileri application/x-www-form-urlencoded formatına dönüştürme
@@ -44,8 +48,10 @@ app.post('/send-email', async (req, res) => {
       },
     });
 
+    // Web3Forms yanıtını loglama
     console.log('Web3Forms yanıtı:', response.data);
 
+    // Başarı durumu kontrolü
     if (response.data.success) {
       res.status(200).json({ message: 'Form başarıyla gönderildi!' });
     } else {
