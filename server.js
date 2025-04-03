@@ -45,3 +45,8 @@ app.post('/send-email', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on https://osmandemirwebsiteemailpost.onrender.com/send-email`);
 });
+
+
+app.get('/', (req, res) => {
+  res.send('API Çalışıyor! 🚀 POST /send-email endpointini kullan.');
+});
