@@ -9,6 +9,10 @@ const port = process.env.PORT || 5000;
 
 // Middleware'ler
 app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000/contact' // sadece bu siteden gelen istekleri kabul et
+}));
+
 app.use(bodyParser.json());
 
 // Web3Forms API URL
@@ -48,5 +52,5 @@ app.listen(port, () => {
 
 
 app.get('/', (req, res) => {
-  res.send('API Çalışıyor! 🚀 POST /send-email endpointini kullan.');
+  res.send('API Çalışıyor! 🚀');
 });
