@@ -1,5 +1,7 @@
 # Website Contact Form Backend
 
+> ⚠️ Bu repo, [osmandemir2533.github.io](https://osmandemir2533.github.io/) web sitesinin iletişim formu için özel olarak geliştirilmiş bir backend servisidir. Web sitesinin reposuna [buradan](https://github.com/osmandemir2533/osmandemir2533.github.io) ulaşabilirsiniz.
+
 Bu proje, statik web siteleri için güvenli ve kolay bir iletişim formu backend çözümü sunar. Web3Forms servisini kullanarak e-posta gönderimi sağlar.
 
 ## 🚀 Proje Hakkında
@@ -22,33 +24,11 @@ Bu backend servisi, [osmandemir2533.github.io](https://osmandemir2533.github.io/
 - CORS
 - dotenv
 
-## 📦 Kurulum
-
-1. Projeyi klonlayın:
-```bash
-git clone https://github.com/osmandemir2533/websiteEmailPost.git
-```
-
-2. Bağımlılıkları yükleyin:
-```bash
-npm install
-```
-
-3. `.env` dosyası oluşturun ve Web3Forms API anahtarınızı ekleyin:
-```env
-WEB3FORMS_ACCESS_KEY=your_access_key_here
-```
-
-4. Sunucuyu başlatın:
-```bash
-npm start
-```
-
 ## 🔌 API Kullanımı
 
 ### E-posta Gönderme
 
-**Endpoint:** `POST @https://backend-url.com/api/send-email`
+**Endpoint:** `POST @https://backend-url.com/api/`
 
 **Request Body:**
 ```json
@@ -66,16 +46,35 @@ npm start
 }
 ```
 
-## 🔒 Güvenlik
+## 🔒 Güvenlik ve Yapılandırma
 
-- CORS politikaları ile güvenli cross-origin istekleri
-- Web3Forms API anahtarı .env dosyasında güvenli bir şekilde saklanır
-- Gelen isteklerde gerekli alanların doğrulaması yapılır
+Bu proje Render platformunda host edilmektedir. Web3Forms API anahtarı güvenli bir şekilde yönetilmektedir:
 
-## 📝 Lisans
+1. Render Dashboard'da projenin Environment Variables bölümüne gidilir
+2. `WEB3FORMS_ACCESS_KEY` adında yeni bir environment variable oluşturulur
+3. Web3Forms'tan alınan API anahtarı bu değişkene atanır
+4. Değişiklikler kaydedilir ve proje yeniden deploy edilir
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+Projede API anahtarına erişim, Node.js'in `process.env` özelliği kullanılarak yapılır:
+
+```javascript
+// API anahtarına güvenli erişim
+const apiKey = process.env.WEB3FORMS_ACCESS_KEY;
+```
+
+Bu sayede API anahtarı .env içinde güvenli bir şekilde saklanır ve hiçbir şekilde kaynak kodunda görünmez.
 
 ## 👨‍💻 Geliştirici
 
-- [Osman Demir](https://github.com/osmandemir2533) 
+- [Osman Demir](https://github.com/osmandemir2533)
+
+---
+
+## 📬 İletişim
+
+Bu projede yaptığım çalışmalarla ilgili başka sorularınız varsa, **Benimle her zaman iletişime geçebilirsiniz**:
+
+[![LinkedIn](https://img.icons8.com/ios-filled/50/0A66C2/linkedin.png)](https://www.linkedin.com/in/osmandemir2533/)  &nbsp;&nbsp; 
+[![Website](https://img.icons8.com/ios-filled/50/8e44ad/domain.png)](https://osmandemir2533.github.io/)
+
+---
