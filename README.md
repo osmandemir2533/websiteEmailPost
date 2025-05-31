@@ -24,6 +24,38 @@ Bu backend servisi, [osmandemir2533.github.io](https://osmandemir2533.github.io/
 - CORS
 - dotenv
 
+## 📝 Servisi Kullanmak İçin Adımlar
+
+1. **Web3Forms API Anahtarı Alma:**
+   - [Web3Forms](https://web3forms.com/) sitesine gidin
+   - Mailinizi yazın ve API anahtarınızı alın
+
+2. **Proje Yapılandırması:**
+   - Projeyi klonlayın veya fork edin
+   - `.env` dosyası oluşturun ve API anahtarınızı ekleyin:
+     ```env
+     WEB3FORMS_ACCESS_KEY=your_api_key_here
+     ```
+
+3. **Deployment:**
+   - Projeyi GitHub'a push edin
+   - Sonra Render, Vercel veya benzeri bir platformda deploy edin
+   - Environment Variables bölümünde `WEB3FORMS_ACCESS_KEY` değişkenini tanımlayın
+
+4. **Backend URL Yapılandırması:**
+   - `server.js` dosyasında URL'i güncelleyin:
+     ```javascript
+     app.listen(port, () => {
+       console.log(`Server is running on YOUR_BACKEND_URL`);
+     });
+     ```
+   - Değişiklikleri push edin ve yeniden deploy edin
+
+5. **Frontend Entegrasyonu:**
+   - Statik sitenizde form submit işleminde backend URL'inize POST isteği atın
+   - Örnek endpoint: `YOUR_BACKEND_URL/api/`
+   - İstediğiniz yerden bu URL e istek atarak mail servisinizi kullanabilirsiniz
+
 ## 🔌 API Kullanımı
 
 ### E-posta Gönderme
