@@ -7,6 +7,15 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const corsOptions = {
+  origin: 'https://osmandemir2533.github.io',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 // Email ayarları (Gmail SMTP) - Environment variables'dan al
 const EMAIL_CONFIG = {
   service: 'gmail',
@@ -17,7 +26,6 @@ const EMAIL_CONFIG = {
 };
 
 // Middleware'ler
-app.use(cors());
 app.use(bodyParser.json());
 
 // Email transporter oluştur
