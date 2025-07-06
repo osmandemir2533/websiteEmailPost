@@ -2,11 +2,24 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+
+
+//--------------
+// SADECE LOCALDE TEST İÇİN TAMAMEN AÇIK CORS - Testleri yaptıktan sonra 12 ile 13 ü yorum satırına al canlıya atmak için 16.satırda denilenleri yap
+//app.use(cors());
+//app.options('*', cors());
+//--------------
+
+
+
+//--------------
+//CANLI İÇİN AŞAĞIDAKİ KODLAR - 17 ile 24 arasındaki yorum satırlarını kaldır
 const corsOptions = {
   origin: 'https://osmandemir2533.github.io',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -15,6 +28,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+//--------------
+
+
 
 // Email ayarları (Gmail SMTP) - Environment variables'dan al
 const EMAIL_CONFIG = {
@@ -65,12 +81,31 @@ function getDeviceModel(userAgent) {
   return 'Bilinmeyen';
 }
 
+async function getGeoLocation(ip) {
+  try {
+    const response = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,district,query`);
+    const data = await response.json();
+    if (data && data.status !== 'fail') {
+      // Örnek: Türkiye, İstanbul, Kadıköy
+      let detay = [data.country, data.regionName, data.city, data.district].filter(Boolean).join(', ');
+      return detay;
+    }
+    return '';
+  } catch (e) {
+    return '';
+  }
+}
+
 // İletişim formu için POST endpoint - Kendi email servisimiz
 app.post('/send-email', async (req, res) => {
   const { name, email, message, phone, location } = req.body;
   
   // Sistem bilgilerini otomatik al
   let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket?.remoteAddress || 'Bilinmeyen';
+  if (typeof ip === 'string' && ip.includes(',')) {
+    ip = ip.split(',')[0].trim();
+  }
+  const geoLocation = await getGeoLocation(ip);
   
   // Tarayıcı bilgisini temizle
   const userAgent = req.headers['user-agent'] || 'Bilinmeyen';
@@ -167,21 +202,16 @@ app.post('/send-email', async (req, res) => {
         <div class="container-pc" style="font-family: 'Segoe UI', Arial, sans-serif; background:rgb(244, 248, 255); padding: 8px; border-radius: 18px; box-shadow: 0 8px 32px rgba(80,80,180,0.12); max-width: 600px; margin: 0 auto;">
           <div style="background:#fff; border-radius:12px; box-shadow:0 2px 8px #e0e7ff; padding:24px; margin-bottom:24px;">
             <h2 style="color:#2563eb; margin-top:0; font-size:0.95rem; font-weight:700; margin-bottom:8px;">Gönderen Bilgileri</h2>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>İsim:</div><div style='padding-left:8px;'>${name}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Email:</div><div style='padding-left:8px;'><a href="mailto:${email}">${email}</a></div></div>
-            ${phone ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Telefon:</div><div style='padding-left:8px;'>${phone}</div></div>` : ''}
-            ${location ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Konum:</div><div style='padding-left:8px;'>${location}</div></div>` : ''}
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>IP:</div><div style='padding-left:8px;'>${ip}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Tarayıcı:</div><div style='padding-left:8px;'>${browser}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'>
-              <div style='min-width:110px; font-weight:700; color:#222;'>Cihaz:</div>
-              <div style='padding-left:8px;'>
-                ${deviceType}${deviceModel && deviceModel !== deviceType ? ` (${deviceModel})` : ''}
-              </div>
-            </div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>İşletim Sistemi:</div><div style='padding-left:8px;'>${os}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Dil:</div><div style='padding-left:8px;'>${cleanLanguage}</div></div>
-            <div style='display:flex; margin:0 0 0 0;'><div style='min-width:110px; font-weight:700; color:#222;'>Tarih:</div><div style='padding-left:8px;'>${new Date().toLocaleString('tr-TR')}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İsim:</div><div style='padding-left:8px;'>${name}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Email:</div><div style='padding-left:8px;'><a href="mailto:${email}">${email}</a></div></div>
+            ${phone ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Telefon:</div><div style='padding-left:8px;'>${phone}</div></div>` : ''}
+            ${location ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Konum:</div><div style='padding-left:8px;'>${location}</div></div>` : ''}
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>IP (Konum Adresi):</div><div style='padding-left:8px;'>${ip} ${geoLocation ? `<span style="color:#e53935;">(${geoLocation})</span>` : ''}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarayıcı:</div><div style='padding-left:8px;'>${browser}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Cihaz:</div><div style='padding-left:8px;'>${deviceType}${deviceModel && deviceModel !== deviceType ? ` (${deviceModel})` : ''}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İşletim Sistemi:</div><div style='padding-left:8px;'>${os}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Dil:</div><div style='padding-left:8px;'>${cleanLanguage}</div></div>
+            <div style='display:flex; margin:0 0 0 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarih:</div><div style='padding-left:8px;'>${new Date().toLocaleString('tr-TR')}</div></div>
           </div>
           <div class="border-left-mobile border-left-pc" style="background: linear-gradient(135deg,rgb(238, 241, 250),rgba(226, 231, 246, 0.91),rgba(206, 216, 244, 0.74),rgba(187, 203, 247, 0.59),rgba(182, 182, 229, 0.59),rgba(151, 102, 186, 0.53)); 
             border-radius: 16px; 
