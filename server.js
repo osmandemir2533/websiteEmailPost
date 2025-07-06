@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -69,31 +69,40 @@ function getDeviceModel(userAgent) {
   return 'Bilinmeyen';
 }
 
-// Yedekli GeoLocation fonksiyonu
-async function getGeoLocation(ip) {
-  // 1. ip-api.com
-  try {
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,district,query`);
-    const data = await response.json();
-    console.log('ip-api yanıtı:', data);
-    if (data && data.status !== 'fail') {
-      let detay = [data.country, data.regionName, data.city, data.district].filter(Boolean).join(', ');
-      if (detay) return detay;
+  async function getGeoLocation(ip) {
+    try {
+      console.log('GeoLocation isteği gönderiliyor - IP:', ip);
+      const response = await axios.get(`http://ip-api.com/json/${ip}?fields=country,regionName,city,district,query`);
+      const data = response.data;
+      console.log('GeoLocation API yanıtı:', data);
+      
+      if (data && data.status !== 'fail') {
+        // Örnek: Türkiye, İstanbul, Kadıköy
+        let detay = [data.country, data.regionName, data.city, data.district].filter(Boolean).join(', ');
+        console.log('GeoLocation başarılı:', detay);
+        return detay || 'Localhost (Test Ortamı)';
+      } else {
+        console.log('GeoLocation başarısız - Status:', data.status, 'Message:', data.message);
+        return 'API yanıt vermedi';
+      }
+    } catch (e) {
+      console.error('GeoLocation hatası:', e.message);
+      return 'API hatası';
     }
-  } catch (e) {
-    console.error('ip-api hatası:', e);
   }
-  // 2. ipinfo.io (ücretsiz, rate limitli)
-  try {
-    const response = await fetch(`https://ipinfo.io/${ip}/json?token=YOUR_IPINFO_TOKEN`); // token gerekebilir
-    const data = await response.json();
-    console.log('ipinfo yanıtı:', data);
-    let detay = [data.country, data.region, data.city].filter(Boolean).join(', ');
-    if (detay) return detay;
-  } catch (e) {
-    console.error('ipinfo hatası:', e);
-  }
-  return '';
+
+// XSS temizliği için yardımcı fonksiyon
+function escapeHtml(text) {
+  if (!text) return '';
+  return text.toString().replace(/[&<>"']/g, function(m) {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m];
+  });
 }
 
 // İletişim formu için POST endpoint - Kendi email servisimiz
@@ -105,7 +114,19 @@ app.post('/send-email', async (req, res) => {
   if (typeof ip === 'string' && ip.includes(',')) {
     ip = ip.split(',')[0].trim();
   }
-  const geoLocation = await getGeoLocation(ip);
+  
+  // IPv6 localhost'u IPv4'e çevir
+  if (ip === '::1' || ip === '::ffff:127.0.0.1') {
+    ip = '127.0.0.1';
+  }
+  
+  // Localhost için API çağrısı yapma
+  let geoLocation;
+  if (ip === '127.0.0.1' || ip === '::1') {
+    geoLocation = 'Localhost (Test Ortamı)';
+  } else {
+    geoLocation = await getGeoLocation(ip);
+  }
   
   // Tarayıcı bilgisini temizle
   const userAgent = req.headers['user-agent'] || 'Bilinmeyen';
@@ -145,11 +166,6 @@ app.post('/send-email', async (req, res) => {
   
   // Cihaz modelini tahmin et
   const deviceModel = getDeviceModel(userAgent);
-
-  // IPv6 localhost'u IPv4'e çevir
-  if (ip === '::1' || ip === '::ffff:127.0.0.1') {
-    ip = '127.0.0.1';
-  }
 
   console.log(`Email gönderme isteği alındı - Gönderen: ${name} (${email})`);
 
@@ -202,16 +218,16 @@ app.post('/send-email', async (req, res) => {
         <div class="container-pc" style="font-family: 'Segoe UI', Arial, sans-serif; background:rgb(244, 248, 255); padding: 8px; border-radius: 18px; box-shadow: 0 8px 32px rgba(80,80,180,0.12); max-width: 600px; margin: 0 auto;">
           <div style="background:#fff; border-radius:12px; box-shadow:0 2px 8px #e0e7ff; padding:24px; margin-bottom:24px;">
             <h2 style="color:#2563eb; margin-top:0; font-size:0.95rem; font-weight:700; margin-bottom:8px;">Gönderen Bilgileri</h2>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İsim:</div><div style='padding-left:8px;'>${name}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Email:</div><div style='padding-left:8px;'><a href="mailto:${email}">${email}</a></div></div>
-            ${phone ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Telefon:</div><div style='padding-left:8px;'>${phone}</div></div>` : ''}
-            ${location ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Konum:</div><div style='padding-left:8px;'>${location}</div></div>` : ''}
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>IP (Konum Adresi):</div><div style='padding-left:8px;'>${ip} ${geoLocation ? `<span style="color:#e53935;">(${geoLocation})</span>` : ''}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarayıcı:</div><div style='padding-left:8px;'>${browser}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Cihaz:</div><div style='padding-left:8px;'>${deviceType}${deviceModel && deviceModel !== deviceType ? ` (${deviceModel})` : ''}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İşletim Sistemi:</div><div style='padding-left:8px;'>${os}</div></div>
-            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Dil:</div><div style='padding-left:8px;'>${cleanLanguage}</div></div>
-            <div style='display:flex; margin:0 0 0 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarih:</div><div style='padding-left:8px;'>${new Date().toLocaleString('tr-TR')}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İsim:</div><div style='padding-left:8px;'>${escapeHtml(name)}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Email:</div><div style='padding-left:8px;'><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></div></div>
+            ${phone ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Telefon:</div><div style='padding-left:8px;'>${escapeHtml(phone)}</div></div>` : ''}
+            ${location ? `<div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Konum:</div><div style='padding-left:8px;'>${escapeHtml(location)}</div></div>` : ''}
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>IP (Konum Adresi):</div><div style='padding-left:8px;'>${ip} <span style="color:#e53935;">${(geoLocation && !geoLocation.startsWith('API') && geoLocation !== 'API yanıt vermedi') ? `(${escapeHtml(geoLocation)})` : '(Adres alınamadı)'}</span></div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarayıcı:</div><div style='padding-left:8px;'>${escapeHtml(browser)}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Cihaz:</div><div style='padding-left:8px;'>${escapeHtml(deviceType)}${deviceModel && deviceModel !== deviceType ? ` (${escapeHtml(deviceModel)})` : ''}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>İşletim Sistemi:</div><div style='padding-left:8px;'>${escapeHtml(os)}</div></div>
+            <div style='display:flex; margin:0 0 1px 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Dil:</div><div style='padding-left:8px;'>${escapeHtml(cleanLanguage)}</div></div>
+            <div style='display:flex; margin:0 0 0 0;'><div style='min-width:160px; font-weight:700; color:#222;'>Tarih:</div><div style='padding-left:8px;'>${escapeHtml(new Date().toLocaleString('tr-TR'))}</div></div>
           </div>
           <div class="border-left-mobile border-left-pc" style="background: linear-gradient(135deg,rgb(238, 241, 250),rgba(226, 231, 246, 0.91),rgba(206, 216, 244, 0.74),rgba(187, 203, 247, 0.59),rgba(182, 182, 229, 0.59),rgba(151, 102, 186, 0.53)); 
             border-radius: 16px; 
@@ -219,7 +235,7 @@ app.post('/send-email', async (req, res) => {
             margin-bottom: 24px; 
             box-shadow: 0 4px 16px rgb(116, 152, 222);">
           <span style="color:#e53935; font-size:1.1rem; font-weight:normal;">Mesaj:</span>
-            <div class="mesaj-icerik" style="font-size:1.35rem; color:#000; font-weight:600; margin-top:16px;">${message.replace(/\n/g, '<br>')}</div>
+            <div class="mesaj-icerik" style="font-size:1.35rem; color:#000; font-weight:600; margin-top:16px;">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
           </div>
         </div>
       `
