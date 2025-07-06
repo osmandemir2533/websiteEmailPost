@@ -1,29 +1,54 @@
 # Website Contact Form Backend
+## _Canlı Ortam - Production Environment_
 
 > ⚠️ Bu repo, [osmandemir2533.github.io](https://osmandemir2533.github.io/) web sitesinin iletişim formu için özel olarak geliştirilmiş bir backend servisidir. Web sitesinin reposuna [buradan](https://github.com/osmandemir2533/osmandemir2533.github.io) ulaşabilirsiniz.
 
-**--Hazır email gönderme servisi --**
+**--Email gönderme servisi --**
 
 Bu proje, statik web siteleri için güvenli ve kolay bir iletişim formu backend çözümü sunar. Gmail SMTP kullanarak e-posta gönderimi sağlar.
 
 ## ✨ Özellikler
 
-- CORS desteği ile güvenli cross-origin istekleri
-- Gmail SMTP entegrasyonu ile güvenilir e-posta gönderimi
-- Basit ve anlaşılır API endpoint'leri
-- Hata yönetimi ve doğrulama kontrolleri
-- Detaylı loglama sistemi
-- Kullanıcı bilgileri toplama
-- Responsive HTML email template'i
-
+- 🔒 **Güvenlik**: XSS koruması ve CORS desteği
+- 📧 **Email**: Gmail SMTP entegrasyonu ile güvenilir e-posta gönderimi
+- 🌍 **Geolocation**: IP adresinden otomatik konum tespiti
+- 📊 **Detaylı Bilgi**: Tarayıcı, cihaz, işletim sistemi ve dil bilgileri
+- 🔍 **Loglama**: Detaylı loglama sistemi
+- ⚡ **API**: Basit ve anlaşılır REST API endpoint'leri
 
 ## 🛠️ Teknolojiler
 
-- Node.js
-- Express.js
-- Nodemailer (Gmail SMTP)
-- CORS
-- dotenv
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **Nodemailer** - Email gönderimi (Gmail SMTP)
+- **Axios** - HTTP istekleri (IP geolocation için)
+- **CORS** - Cross-origin resource sharing
+- **dotenv** - Environment variables yönetimi
+
+## 📦 Kurulum
+
+### 1. Bağımlılıkları Yükle
+
+```bash
+# Tüm paketleri yükle
+npm install
+
+# Veya tek tek yükle
+npm install express cors nodemailer axios dotenv body-parser
+```
+
+### 2. Environment Variables
+
+> Proje güvenliği için kritik bilgiler environment variables olarak saklanır:
+
+`.env` dosyası oluşturun:
+
+```env
+# Gmail SMTP Ayarları
+GMAIL_USER=
+GMAIL_APP_PASSWORD=
+
+```
 
 ## 📁 Proje Yapısı
 
@@ -112,14 +137,21 @@ fetch('YOUR_BACKEND_URL/send-email', {
 }
 ```
 
-## 🔒 Güvenlik ve Yapılandırma
+## 🔒 Güvenlik Özellikleri
+
+### XSS Koruması
+Tüm kullanıcı girdileri HTML escape edilir:
+```javascript
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, function(m) {
+    return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[m];
+  });
+}
+```
 
 ### Environment Variables
-
-Proje güvenliği için kritik bilgiler environment variables olarak saklanır:
-
+Kritik bilgiler güvenli şekilde saklanır:
 ```javascript
-// Gmail SMTP ayarları
 const EMAIL_CONFIG = {
   service: 'gmail',
   auth: {
@@ -128,40 +160,83 @@ const EMAIL_CONFIG = {
   }
 };
 ```
+### CORS Ayarları
 
-### CORS Yapılandırması
-
+**LOCAL İÇİN (Geliştirme Ortamı - Development Environment)**
 ```javascript
-app.use(cors()); // Tüm origin'lere izin verir
+app.use(cors());
+app.options('*', cors());
 ```
 
-### Loglama Sistemi
+**CANLI İÇİN (Canlı Ortam - Production Environment)**
+```javascript
+const corsOptions = {
+  origin: 'https://your-domain.com',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+```
 
-**Örnek loglar:**
-```
-Email gönderme isteği alındı - Gönderen: Ahmet (ahmet@example.com)
-Email gönderiliyor - Gönderen: Ahmet (ahmet@example.com)
-✅ Email başarıyla gönderildi - Gönderen: Ahmet (ahmet@example.com)
-❌ Email gönderme hatası - Gönderen: Ahmet (ahmet@example.com) - Hata: Invalid credentials
-```
+## 📧 Email Template Özellikleri
+
+### Otomatik Toplanan Bilgiler
+- **IP Adresi**: Kullanıcının IP'si
+- **Konum**: IP'den otomatik geolocation
+- **Tarayıcı**: Chrome, Firefox, Safari, Edge, Opera
+- **Cihaz**: PC, Mobil, Tablet + Model bilgisi
+- **İşletim Sistemi**: Windows, macOS, Linux, Android, iOS
+- **Dil**: Tarayıcı dil ayarı
+- **Tarih**: Gönderim zamanı
+
+### Responsive Tasarım
+- Mobil ve desktop uyumlu
+- Gradient arka plan
+- Modern CSS styling
 
 ## 🚀 Çalıştırma
+
+### Local Geliştirme
 
 ```bash
 # Bağımlılıkları yükle
 npm install
 
-# .env dosyasını oluştur ve düzenle
-# GMAIL_USER=
-# GMAIL_APP_PASSWORD=
+# Local için uygun CORS ayarlarını yaz
+
+# .env dosyasını oluştur
+echo "GMAIL_USER= " > .env
+echo "GMAIL_APP_PASSWORD= " >> .env
 
 # Sunucuyu başlat
 node server.js
 
-# Veya 
+# Veya
 npm start
 ```
 
+### Örnek Canlıya Alma (Render üzerinden)
+
+1. **Repository'yi Render'a bağla**
+2. **Environment Variables ekle:**
+   - `GMAIL_USER`: Gmail adresiniz
+   - `GMAIL_APP_PASSWORD`: Gmail uygulama şifresi
+3. **Build Command:** `npm install`
+4. **Start Command:** `node server.js`
+
+## 📊 Loglama Sistemi
+
+**Örnek loglar:**
+```
+🚀 Server is running on port 5000
+📧 Email endpoint: /send-email
+Email gönderme isteği alındı - Gönderen: Ahmet (ahmet@example.com)
+Email gönderiliyor - Gönderen: Ahmet (ahmet@example.com)
+✅ Email başarıyla gönderildi - Gönderen: Ahmet (ahmet@example.com)
+❌ Email gönderme hatası - Gönderen: Ahmet (ahmet@example.com) - Hata: Invalid credentials
+```
 
 ## 👨‍💻 Geliştirici
 
