@@ -8,18 +8,8 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-
-
 //--------------
-// SADECE LOCALDE TEST İÇİN TAMAMEN AÇIK CORS - Testleri yaptıktan sonra 12 ile 13 ü yorum satırına al canlıya atmak için 16.satırda denilenleri yap
-//app.use(cors());
-//app.options('*', cors());
-//--------------
-
-
-
-//--------------
-//CANLI İÇİN AŞAĞIDAKİ KODLAR - 17 ile 24 arasındaki yorum satırlarını kaldır
+//Sadece CANLI Ortam için uygundur Cors Ayarları yapıldı , Local için ek Cors ayarları yazılması lazım
 const corsOptions = {
   origin: 'https://osmandemir2533.github.io',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -29,8 +19,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 //--------------
-
-
 
 // Email ayarları (Gmail SMTP) - Environment variables'dan al
 const EMAIL_CONFIG = {
