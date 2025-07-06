@@ -11,7 +11,13 @@ const port = process.env.PORT || 5000;
 //--------------
 //Sadece CANLI Ortam için uygundur Cors Ayarları yapıldı , Local için ek Cors ayarları yazılması lazım
 const corsOptions = {
-  origin: 'https://osmandemir2533.github.io',
+  origin: function (origin, callback) {
+    if (origin === 'https://osmandemir2533.github.io') {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS hatası: Erişim reddedildi!'));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
   credentials: false
@@ -69,19 +75,31 @@ function getDeviceModel(userAgent) {
   return 'Bilinmeyen';
 }
 
+// Yedekli GeoLocation fonksiyonu
 async function getGeoLocation(ip) {
+  // 1. ip-api.com
   try {
     const response = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,district,query`);
     const data = await response.json();
+    console.log('ip-api yanıtı:', data);
     if (data && data.status !== 'fail') {
-      // Örnek: Türkiye, İstanbul, Kadıköy
       let detay = [data.country, data.regionName, data.city, data.district].filter(Boolean).join(', ');
-      return detay;
+      if (detay) return detay;
     }
-    return '';
   } catch (e) {
-    return '';
+    console.error('ip-api hatası:', e);
   }
+  // 2. ipinfo.io (ücretsiz, rate limitli)
+  try {
+    const response = await fetch(`https://ipinfo.io/${ip}/json?token=YOUR_IPINFO_TOKEN`); // token gerekebilir
+    const data = await response.json();
+    console.log('ipinfo yanıtı:', data);
+    let detay = [data.country, data.region, data.city].filter(Boolean).join(', ');
+    if (detay) return detay;
+  } catch (e) {
+    console.error('ipinfo hatası:', e);
+  }
+  return '';
 }
 
 // İletişim formu için POST endpoint - Kendi email servisimiz
