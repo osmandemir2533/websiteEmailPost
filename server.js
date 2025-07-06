@@ -9,12 +9,23 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //--------------
-//Sadece CANLI Ortam için uygundur Cors Ayarları yapıldı , Local için ek Cors ayarları yazılması lazım
+// CORS Ayarları - Hem local hem canlı için
+const allowedOrigins = [
+  'https://osmandemir2533.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'null' // file:// için
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    if (origin === 'https://osmandemir2533.github.io') {
+    // Origin yoksa (Postman, curl gibi) veya listedeyse izin ver
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('CORS reddedildi - Origin:', origin);
       callback(new Error('CORS hatası: Erişim reddedildi!'));
     }
   },
