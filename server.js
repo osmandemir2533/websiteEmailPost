@@ -1,17 +1,31 @@
-const express = require('express');
-const cors = require('cors');
-const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-require('dotenv').config();
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import axios from "axios";
+import { Resend } from "resend";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 //--------------
-//CANLI İÇİN uygun. CORS ayarları buna göre yapıldı. Geliştirme Local için ek ayarlar yazılmalı CORS izni için filan
+// SADECE LOCALDE TEST İÇİN TAMAMEN AÇIK CORS - Testleri yaptıktan sonra 12 ile 13 ü yorum satırına al canlıya atmak için 16.satırda denilenleri yap
+//app.use(cors());
+//app.options('*', cors());
+//--------------
+
+
+
+//--------------
+//CANLI İÇİN AŞAĞIDAKİ KODLAR - 17 ile 24 arasındaki yorum satırlarını kaldır
 const corsOptions = {
-  origin: 'https://osmandemir2533.github.io',
+  origin: [
+    'https://osmandemir2533.github.io',
+    'https://osmandemir.netlify.app'
+  ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
   credentials: false
@@ -20,20 +34,13 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 //--------------
 
-// Email ayarları (Gmail SMTP) - Environment variables'dan al
-const EMAIL_CONFIG = {
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-};
+
 
 // Middleware'ler
 app.use(bodyParser.json());
 
 // Email transporter oluştur
-const transporter = nodemailer.createTransport(EMAIL_CONFIG);
+
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -175,20 +182,17 @@ app.post('/send-email', async (req, res) => {
   }
 
   // Environment variables kontrolü
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    console.error('Email ayarları eksik! GMAIL_USER ve GMAIL_APP_PASSWORD environment variables gerekli.');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('Resend API anahtarı eksik!');
     return res.status(500).json({ message: 'Sunucu yapılandırma hatası!' });
   }
+  
 
   try {
     console.log(`Email gönderiliyor - Gönderen: ${name} (${email})`);
     
     // Email içeriği
-    const mailOptions = {
-      from: EMAIL_CONFIG.auth.user,
-      to: EMAIL_CONFIG.auth.user,
-      subject: '📩 Yeni Mesaj!',
-      html: `
+    const mailHtml = `
         <style>
           @media only screen and (max-width: 600px) {
             .mesaj-icerik {
@@ -238,11 +242,16 @@ app.post('/send-email', async (req, res) => {
             <div class="mesaj-icerik" style="font-size:1.35rem; color:#000; font-weight:600; margin-top:16px;">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
           </div>
         </div>
-      `
-    };
+      `;
 
     // Email gönder
-    const info = await transporter.sendMail(mailOptions);
+    const response = await resend.emails.send({
+      from: 'OsmanMail <onboarding@resend.dev>', // test aşamasında sabit kalmalı
+      to: process.env.RESEND_TO_EMAIL,            // .env dosyasındaki maili okur
+      subject: '📩 Yeni Mesaj!',
+      html: mailHtml
+    });
+   
 
     console.log(`✅ Email başarıyla gönderildi - Gönderen: ${name} (${email})`);
     res.status(200).json({ message: 'Form başarıyla gönderildi!' });

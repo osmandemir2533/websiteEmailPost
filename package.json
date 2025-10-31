@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^7.0.4"
+    "nodemailer": "^7.0.4",
+    "resend": "^6.4.0"
   }
 }
