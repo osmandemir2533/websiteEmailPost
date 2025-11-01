@@ -240,6 +240,10 @@ Email gönderiliyor - Gönderen: Ahmet (ahmet@example.com)
 ❌ Email gönderme hatası - Gönderen: Ahmet (ahmet@example.com) - Hata: Invalid credentials
 ```
 
+## 📤 Alternatif Versiyon (NodeMailer + Gmail SMTP)
+
+> 💡 Bu projenin, **NodeMailer** kütüphanesi ve **Gmail SMTP (Simple Mail Transfer Protocol)** altyapısı kullanılarak geliştirilen klasik sürümüne [bağlantıdan](https://github.com/osmandemir2533/websiteEmailPost-SMPT-) ulaşabilirsiniz.
+
 ## 👨‍💻 Geliştirici
 
 - [Osman Demir](https://github.com/osmandemir2533)
