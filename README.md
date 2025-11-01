@@ -1,29 +1,37 @@
-# Website Contact Form Backend
+# 📩 Website Contact Form Backend (Resend API Version)
 ## _Canlı Ortam - Production Environment_
 
-> ⚠️ Bu repo, [osmandemir2533.github.io](https://osmandemir2533.github.io/) web sitesinin iletişim formu için özel olarak geliştirilmiş bir backend servisidir. Web sitesinin reposuna [buradan](https://github.com/osmandemir2533/osmandemir2533.github.io) ulaşabilirsiniz.
+> ⚙️ Bu repo, [osmandemir2533.github.io](https://osmandemir2533.github.io/) web sitesinin iletişim formu için geliştirilmiş özel bir **email backend servisidir**.  
+> Statik frontend ile entegre çalışır ve **Resend API** üzerinden güvenli e-posta gönderimi sağlar.  
+> Web sitesinin frontend reposuna [buradan](https://github.com/osmandemir2533/osmandemir2533.github.io) ulaşabilirsiniz.
 
-**--Email gönderme servisi --**
-
-Bu proje, statik web siteleri için güvenli ve kolay bir iletişim formu backend çözümü sunar. Gmail SMTP kullanarak e-posta gönderimi sağlar.
+---
 
 ## ✨ Özellikler
 
-- 🔒 **Güvenlik**: XSS koruması ve CORS desteği
-- 📧 **Email**: Gmail SMTP entegrasyonu ile güvenilir e-posta gönderimi
-- 🌍 **Geolocation**: IP adresinden otomatik konum tespiti
-- 📊 **Detaylı Bilgi**: Tarayıcı, cihaz, işletim sistemi ve dil bilgileri
-- 🔍 **Loglama**: Detaylı loglama sistemi
-- ⚡ **API**: Basit ve anlaşılır REST API endpoint'leri
+- ⚡ **Resend API** ile hızlı ve güvenli e-posta gönderimi  
+- 🔒 **CORS** ve **XSS** koruması  
+- 🌍 **IP Geolocation** (axios ile)  
+- 📊 **Tarayıcı, cihaz, işletim sistemi ve dil tespiti**  
+- 🧾 **Detaylı loglama sistemi**  
+- 💡 **Statik sitelerle tam uyumlu backend çözümü**
 
-## 🛠️ Teknolojiler
+---
 
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **Nodemailer** - Email gönderimi (Gmail SMTP)
-- **Axios** - HTTP istekleri (IP geolocation için)
-- **CORS** - Cross-origin resource sharing
-- **dotenv** - Environment variables yönetimi
+## 🛠️ Kullanılan Teknolojiler
+
+| Teknoloji | Amaç |
+|------------|------|
+| **Node.js** | Runtime ortamı |
+| **Express.js** | Web framework |
+| **Resend** | Email gönderim servisi (Modern API) |
+| **Axios** | IP konum sorgusu |
+| **dotenv** | Ortam değişkenleri yönetimi |
+| **CORS** | Domain erişim kontrolü |
+| **body-parser** | JSON gövde işlemleri |
+
+---
+
 
 ## 📦 Kurulum
 
@@ -34,7 +42,7 @@ Bu proje, statik web siteleri için güvenli ve kolay bir iletişim formu backen
 npm install
 
 # Veya tek tek yükle
-npm install express cors nodemailer axios dotenv body-parser
+npm install express cors axios dotenv body-parser resend
 ```
 
 ### 2. Environment Variables
@@ -44,11 +52,14 @@ npm install express cors nodemailer axios dotenv body-parser
 `.env` dosyası oluşturun:
 
 ```env
-# Gmail SMTP Ayarları
-GMAIL_USER=
-GMAIL_APP_PASSWORD=
+# Resend API Anahtarı
+RESEND_API_KEY=
 
+# Gelen mesajların iletileceği e-posta
+RESEND_TO_EMAIL=
 ```
+> 📌Resend, hesabınıza kayıtlı e-posta adresine mail göndermenize izin verir.
+Yani ```RESEND_TO_EMAIL``` değişkeni, Resend hesabınızla kayıt olduğunuz e-posta adresiyle aynı olmalıdır.
 
 ## 📁 Proje Yapısı
 
@@ -133,7 +144,7 @@ fetch('YOUR_BACKEND_URL/send-email', {
 {
   "message": "API Çalışıyor! 🚀",
   "status": "OK", 
-  "timestamp": "2024-01-15T10:30:00.000Z"
+  "timestamp": "2026-01-15T10:30:00.000Z"
 }
 ```
 
@@ -149,17 +160,6 @@ function escapeHtml(text) {
 }
 ```
 
-### Environment Variables
-Kritik bilgiler güvenli şekilde saklanır:
-```javascript
-const EMAIL_CONFIG = {
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-};
-```
 ### CORS Ayarları
 
 **LOCAL İÇİN (Geliştirme Ortamı - Development Environment)**
@@ -196,6 +196,8 @@ app.options('*', cors(corsOptions));
 - Gradient arka plan
 - Modern CSS styling
 
+<img src="https://i.imgur.com/PttcqlF.png" width="320"/>
+
 ## 🚀 Çalıştırma
 
 ### Local Geliştirme
@@ -207,8 +209,8 @@ npm install
 # Local için uygun CORS ayarlarını yaz
 
 # .env dosyasını oluştur
-echo "GMAIL_USER= " > .env
-echo "GMAIL_APP_PASSWORD= " >> .env
+echo "RESEND_API_KEY= " > .env
+echo "RESEND_TO_EMAIL= " >> .env
 
 # Sunucuyu başlat
 node server.js
@@ -221,8 +223,8 @@ npm start
 
 1. **Repository'yi Render'a bağla**
 2. **Environment Variables ekle:**
-   - `GMAIL_USER`: Gmail adresiniz
-   - `GMAIL_APP_PASSWORD`: Gmail uygulama şifresi
+   - `RESEND_API_KEY`: Resend API Anahtarı
+   - `RESEND_TO_EMAIL`: Gelen Mesajların İletileceği e-posta Adresi
 3. **Build Command:** `npm install`
 4. **Start Command:** `node server.js`
 
