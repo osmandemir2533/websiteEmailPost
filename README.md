@@ -1,6 +1,7 @@
 # 📩 Website Contact Form Backend (Resend API Version)
 ## _Canlı Ortam - Production Environment_
 
+
 > ⚙️ Bu repo, [osmandemir2533.github.io](https://osmandemir2533.github.io/) web sitesinin iletişim formu için geliştirilmiş özel bir **email backend servisidir**.  
 > Statik frontend ile entegre çalışır ve **Resend API** üzerinden güvenli e-posta gönderimi sağlar.  
 > Web sitesinin frontend reposuna [buradan](https://github.com/osmandemir2533/osmandemir2533.github.io) ulaşabilirsiniz.
