@@ -196,8 +196,6 @@ app.options('*', cors(corsOptions));
 - Gradient arka plan
 - Modern CSS styling
 
-<img src="https://i.imgur.com/PttcqlF.png" width="320"/>
-
 ## 🚀 Çalıştırma
 
 ### Local Geliştirme
